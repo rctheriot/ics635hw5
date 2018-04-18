@@ -7,10 +7,13 @@ from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 import operator
 
+from KmPlotter import KmPlotter
 
-features = 21
+plotter = KmPlotter()
 
-X, y = make_blobs(n_features=features, centers=features, cluster_std=10)
+features = 4
+
+X, y = make_blobs(n_samples=200, n_features=2, centers=features, cluster_std=1)
 test = []
 test_labels = []
 
@@ -28,6 +31,8 @@ test_labels = np.array(test_labels)
 
 kmeans = KMeans(n_clusters=features, random_state=0).fit(X)
 prediction = kmeans.predict(test)
+# def plot(self, machine, data, fileName, fileType="png", saveInsteadOfShow=True):
+plotter.plot(kmeans, X, fileName="blobs")
 test_len = len(test)
 
 num_labels = 0
@@ -61,3 +66,4 @@ for i in range(0, features):
   num_corr = num_corr + len(set(label_array[i]) & set(prediction_array2[i]))
 
 print(num_corr / num_labels)
+

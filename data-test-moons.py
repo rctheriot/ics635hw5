@@ -36,5 +36,10 @@ for i in range(0, len(clusterRange)):
     plotter.plot(machine, X, fileName="moonTest-clusters" + str(clusterRange[i]))
 
 
+print(dir(machine))
+print()
+print()
+print(vars(machine))
+
 
 print("Done")
