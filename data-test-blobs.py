@@ -29,11 +29,11 @@ clusterRange = generateValues(2, 10, 1)
 
 for i in range(0, len(clusterRange)):
     print("Run ", i+1, " / ", len(clusterRange))
-    X, y = make_moons(n_samples=20, shuffle=True, noise=None, random_state=None)
+    X, y = make_blobs(n_samples=20, n_features=2, shuffle=True, noise=None, random_state=None)
     machine = KMeans(n_clusters=clusterRange[i], random_state=0).fit(X)
 
     # def plot(self, machine, data, fileName, fileType="png", saveInsteadOfShow=True):
-    plotter.plot(machine, X, fileName="moonTest-clusters" + str(clusterRange[i]))
+    plotter.plot(machine, X, fileName="blobTest-clusters" + str(clusterRange[i]))
 
 
 
