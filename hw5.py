@@ -3,6 +3,7 @@ from random import randint
 
 from sklearn.datasets import make_blobs
 from sklearn.cluster import KMeans
+from sklearn import metrics
 
 import matplotlib.pyplot as plt
 import operator
@@ -14,12 +15,10 @@ plotter = KmPlotter()
 
 centroids = 4
 
-X, y = make_blobs(n_features=2, centers=centroids, cluster_std=0.5)
+X, y = make_blobs(n_features=2, centers=centroids, cluster_std=3)
 
 kmeans = KMeans(n_clusters=centroids, random_state=0).fit(X)
 
-# def plot(self, machine, data, fileName, fileType="png", saveInsteadOfShow=True):
-plotter.plot(kmeans, X, fileName="blobs")
 
 prediction = kmeans.predict(X)
 data_length = len(X)
@@ -55,3 +54,9 @@ for i in range(0, centroids):
   num_corr = num_corr + len(set(label_array[i]) & set(prediction_array2[i]))
 
 print(num_corr / num_labels)
+
+calinskiResult = metrics.calinski_harabaz_score(X, kmeans.labels_)
+
+# def plot(self, machine, data, fileName, fileType="png", saveInsteadOfShow=True):
+plotter.plot(kmeans, X, fileName="blobs-correct" + str(num_corr / num_labels) + "-calinski" + str(calinskiResult))
+

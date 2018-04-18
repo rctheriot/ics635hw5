@@ -1,7 +1,9 @@
 
 
 import matplotlib.pyplot as plt
+from matplotlib.colors import LogNorm
 import numpy as np
+from sklearn import mixture
 
 
 
@@ -41,4 +43,50 @@ class KmPlotter:
         else:
             plt.show()
         plt.clf()
+
+        # Now create GaussianMixture
+        # print("cluster centers: ", len(machine.cluster_centers_))
+        clf = mixture.GaussianMixture(n_components=len(machine.cluster_centers_), covariance_type='full')
+        # repack for GaussianMixture
+        gma = []
+        for i in range(0, len(machine.cluster_centers_)):
+            gma.append([])
+        t_dataPredictions = machine.predict(data)
+        for i in range(0, len(data)):
+            gma[t_dataPredictions[i]].append(data[i])
+        X_train = np.vstack(gma)
+
+        # print()
+        # print()
+        # print((t_dataPredictions))
+        # print()
+        # print()
+        # print((X_train))
+        # print()
+        # print()
+        # print(vars(X_train))
+        # print()
+        # print()
+
+
+        clf.fit(X_train)
+        # display predicted scores by the model as a contour plot
+        x = np.linspace(x_min - 4, x_max + 4) # 1 was applied above
+        y = np.linspace(y_min - 4, y_max + 4)
+        X, Y = np.meshgrid(x, y)
+        XX = np.array([X.ravel(), Y.ravel()]).T
+        Z = -clf.score_samples(XX)
+        Z = Z.reshape(X.shape)
+
+        CS = plt.contour(X, Y, Z, norm=LogNorm(vmin=1.0, vmax=15.0),
+                        levels=np.logspace(0, 1, 20))
+        CB = plt.colorbar(CS, shrink=0.8, extend='both')
+        plt.scatter(X_train[:, 0], X_train[:, 1], .8)
+
+        plt.title('gmm-' + fileName)
+        plt.axis('tight')
+        if (saveInsteadOfShow):
+            plt.savefig('images/gmm-' + fileName + "." + fileType)
+        else:
+            plt.show()
 
