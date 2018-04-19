@@ -150,9 +150,9 @@ params.pointRange.increment = 25
 
 
 # Local quick test values, comment these out to do the above in full
-params.centroidRange.end = 3
-params.standardDeviationRange.end = 1
-params.pointRange.end = 50
+# params.centroidRange.end = 3
+# params.standardDeviationRange.end = 1
+# params.pointRange.end = 50
 
 runTestSet(params, "localtest.csv")
 
