@@ -1,3 +1,5 @@
+import sys
+
 import numpy as np
 from random import randint
 
@@ -9,7 +11,10 @@ import matplotlib.pyplot as plt
 import operator
 
 # Custom plotter
+sys.path.insert(0, './supportFiles')
 from KmPlotter import KmPlotter
+
+# ------------------------------------------------------------------------------------------------------------------
 
 plotter = KmPlotter()
 
