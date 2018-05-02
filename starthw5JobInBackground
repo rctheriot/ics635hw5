@@ -1,0 +1,2 @@
+echo "Starting run in background"
+nohup python3 hw5-blob-std-vary.py &
