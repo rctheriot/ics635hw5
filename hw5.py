@@ -11,15 +11,14 @@ import operator
 from KmPlotter import KmPlotter
 
 plotter = KmPlotter()
+centroids = 2
 
-centroids = 4
-
-X, y = make_blobs(n_features=2, centers=centroids, cluster_std=0.5)
+X, y = make_blobs(n_samples=1000, n_features=100, centers=centroids, cluster_std=5)
 
 kmeans = KMeans(n_clusters=centroids, random_state=0).fit(X)
 
 # def plot(self, machine, data, fileName, fileType="png", saveInsteadOfShow=True):
-plotter.plot(kmeans, X, fileName="blobs")
+# plotter.plot(kmeans, X, fileName="blobs")
 
 prediction = kmeans.predict(X)
 data_length = len(X)
