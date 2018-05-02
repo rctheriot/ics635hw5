@@ -3,6 +3,7 @@
 from random import randint
 import math
 import operator
+import sys
 
 #External installs
 import numpy as np
@@ -14,11 +15,11 @@ from sklearn.cluster import KMeans
 from sklearn.model_selection import train_test_split
 from sklearn import metrics
 
-# from sklearn_extensions.fuzzy_kmeans import KMedians, FuzzyKMeans, KMeans
-
 # Local
+sys.path.insert(0, './supportFiles')
+from KmPlotter import KmPlotter
+from fuzzyk import FuzzyKMeans
 import pysupport as utils
-
 
 # ------------------------------------------------------------------------------------------------------------------
 
@@ -49,7 +50,7 @@ def trainTestOnPoints(allData, allDataLabels, subsetSize, kclusters):
   largeEvalSetLabels = allDataLabels[subsetSize:(subsetSize + pointsToTestInLargeEval)]
 
 
-  # Up to but not including the end range
+  # Up to but not including the end range. currently 4,5 beacuse mismatch on cluster count
   for clusterFitSize in range(4, 5):
     splitTrainTest2080(subset, subsetLabels, clusterFitSize, largeEvalSet, largeEvalSetLabels)
 
@@ -61,11 +62,9 @@ def splitTrainTest2080(subset, subsetLabels, kclusters,  largeEvalSet, largeEval
     # Randomize cuts using the random_state
     X_train, X_test, y_train, y_test = train_test_split(subset, subsetLabels, test_size=0.2, random_state=i)
     
+    # Hard k means
     km = KMeans(n_clusters=kclusters)
     km.fit(X_train)
-
-    # fkm = FuzzyKMeans(k=3, m=2)
-    # How to predict...?
 
     percentCorrect = determinePredictionCorrectness(kclusters, km, X_test, y_test)
     percentCorrectOfLargeEval = determinePredictionCorrectness(kclusters, km, largeEvalSet, largeEvalSetLabels)
@@ -84,6 +83,19 @@ def splitTrainTest2080(subset, subsetLabels, kclusters,  largeEvalSet, largeEval
     lineToWrite += ", " + str(testAdjustedRandResult) + ", " + str(testCalinskiResult)
 
     utils.fileLog(lineToWrite)
+
+    # Fuzzy kmeans
+    fkm = FuzzyKMeans(k=3, m=2)
+    fkm.fit(X_train)
+
+    percentCorrect = determinePredictionCorrectness(kclusters, fkm, X_test, y_test)
+    percentCorrectOfLargeEval = determinePredictionCorrectness(kclusters, fkm, largeEvalSet, largeEvalSetLabels)
+    # evalutate train (fit)
+    trainAdjustedRandResult = metrics.adjusted_rand_score(y_train, fkm.labels_)  
+    trainCalinskiResult = metrics.calinski_harabaz_score(X_train, fkm.labels_)
+    testPredict = fkm.predict(X_test)
+    testAdjustedRandResult = metrics.adjusted_rand_score(y_test, testPredict)  
+    testCalinskiResult = metrics.calinski_harabaz_score(X_train, fkm.labels_)
 
 
 
@@ -137,8 +149,8 @@ n_clusters = len(centers)
 totalNumberOfPointsToGenerate = 1500
 standardDeviationOfPoints = 0.25
 
-# numberOfPointsRange = generateValues(25, 250, 25)
-numberOfPointsRange = generateValues(25, 500, 25)
+numberOfPointsRange = generateValues(25, 50, 25)
+# numberOfPointsRange = generateValues(25, 500, 25)
 
 # All data which to split apart later
 data, labels = make_blobs(n_samples=totalNumberOfPointsToGenerate, centers=n_clusters, cluster_std=standardDeviationOfPoints)

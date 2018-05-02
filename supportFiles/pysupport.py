@@ -1,5 +1,6 @@
 import sys
 import math
+from datetime import datetime
 
 
 # ------------------------------------------------------------------------------------------------------------------------
@@ -22,7 +23,7 @@ def fToStrLimitDecimals(f, decimals=2):
 
 # ------------------------------------------------------------------------------------------------------------------------
 
-class blank:
+class Blank:
     pass
 
 # ------------------------------------------------------------------------------------------------------------------------
@@ -35,3 +36,13 @@ def addLineToFile(fileName, string):
 def addTextToFile(fileName, string):
     with open(fileName, 'a') as file:
         file.write(string)
+
+# ------------------------------------------------------------------------------------------------------------------------
+
+
+def fileLog(s):
+	print("File log>\t", s)
+	now = datetime.now()
+	dateString = "log-" + str(now.year) + "-"  + str(now.month) + "-"  + str(now.day)
+	f = open(dateString + ".log", "a+")
+	f.write(str(s) + "\n")
