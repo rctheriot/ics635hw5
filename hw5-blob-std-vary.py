@@ -51,7 +51,7 @@ def trainTestOnPoints(allData, allDataLabels, subsetSize, kclusters):
 
 
   # Up to but not including the end range. currently 4,5 beacuse mismatch on cluster count
-  for clusterFitSize in range(4, 5):
+  for clusterFitSize in range(kclusters, kclusters + 1):
     splitTrainTest2080(subset, subsetLabels, clusterFitSize, largeEvalSet, largeEvalSetLabels)
 
 
@@ -85,7 +85,7 @@ def splitTrainTest2080(subset, subsetLabels, kclusters,  largeEvalSet, largeEval
     utils.fileLog(lineToWrite)
 
     # Fuzzy kmeans
-    fkm = FuzzyKMeans(k=3, m=2)
+    fkm = FuzzyKMeans(k=kclusters, m=2)
     fkm.fit(X_train)
 
     percentCorrect = determinePredictionCorrectness(kclusters, fkm, X_test, y_test)
@@ -96,6 +96,15 @@ def splitTrainTest2080(subset, subsetLabels, kclusters,  largeEvalSet, largeEval
     testPredict = fkm.predict(X_test)
     testAdjustedRandResult = metrics.adjusted_rand_score(y_test, testPredict)  
     testCalinskiResult = metrics.calinski_harabaz_score(X_train, fkm.labels_)
+
+
+    # Record: point count, test accuracy, after evaluation results (500)
+    lineToWrite = "soft, " + str(kclusters) + ", " + str(len(subset)) + ", " + str(len(largeEvalSet))
+    lineToWrite += ", " + str(percentCorrect) + ", " + str(percentCorrectOfLargeEval)
+    lineToWrite += ", " + str(trainAdjustedRandResult) + ", " + str(trainCalinskiResult)
+    lineToWrite += ", " + str(testAdjustedRandResult) + ", " + str(testCalinskiResult)
+
+    utils.fileLog(lineToWrite)
 
 
 
@@ -144,25 +153,41 @@ def determinePredictionCorrectness(centroids, classifier, dataToTest, dataLabels
 # ------------------------------------------------------------------------------------------------------------------
 
 # 4 clusters each 1 away from center at equal distances from each other
-centers = [[0, 1], [1, 0], [0, -1], [-1, 0]]
-n_clusters = len(centers)
+centers2 = [[0, 1], [1, 0]]
+centers3 = [[1, 0], [0.866, -0.5], [-0.866, -0.5]]
+centers4 = [[1, 0], [1, 0], [0, -1], [-1, 0]]
+centers5 = [[1, 0], [0.309, 0.951], [-0.809, 0.588], [-0.809, -0.588], [.309, -0.951]]
+centers6 = [[1, 0], [0.5, 0.866], [-.5, 0.866], [-1, 0], [-0.5, -.866],[0.5, -0.866]]
+centers = centers2
+
+# adding blanks for index 0 and 1
+allCenters = [[], [], centers2, centers3, centers4, centers5, centers6]
 totalNumberOfPointsToGenerate = 1500
 standardDeviationOfPoints = 0.25
 
-numberOfPointsRange = generateValues(25, 50, 25)
-# numberOfPointsRange = generateValues(25, 500, 25)
+# numberOfPointsRange = generateValues(25, 50, 25)
+numberOfPointsRange = generateValues(25, 500, 25)
 
 # All data which to split apart later
-data, labels = make_blobs(n_samples=totalNumberOfPointsToGenerate, centers=n_clusters, cluster_std=standardDeviationOfPoints)
+dataSets = [[],[]] # add blanks for index 0 and 1
+labelSets = [[],[]]
+for i in range(2, len(allCenters)):
+  data, labels = make_blobs(n_samples=totalNumberOfPointsToGenerate, centers=centers, cluster_std=standardDeviationOfPoints)
+  dataSets.append(data)
+  labelSets.append(labels)
 
 lineToWrite = "Kmeans Type, K Clusters (Data clusters is 4), Points Used 20/80, Points Used Post 20/80"
 lineToWrite += ", 20/80 Test Correct, Post 20/80 Correct"
 lineToWrite += ", 20/80 Train Adjusted Rand Score, 20/80 Train Calinski Score, 20/80 Test Adjusted Rand Score, 20/80 Test Calinski Score"
 utils.fileLog(lineToWrite)
 
-# Evaluate for different numbers of training sets to use 20/80 split on
-for count in numberOfPointsRange:
-  trainTestOnPoints(data, labels, count, n_clusters)
+for i in range(2, len(allCenters)):
+  data = dataSets[i]
+  labels = labelSets[i]
+  n_clusters = i
+  # Evaluate for different numbers of training sets to use 20/80 split on
+  for count in numberOfPointsRange:
+    trainTestOnPoints(data, labels, count, n_clusters)
 
 
 # ------------------------------------------------------------------------------------------------------------------
