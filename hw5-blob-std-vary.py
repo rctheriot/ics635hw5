@@ -39,7 +39,7 @@ def generateValues(start=-5, stop=10, step=0.1):
 
 
 
-def trainTestOnPoints(allData, allDataLabels, subsetSize, kclusters):
+def trainTestOnPoints(allData, allDataLabels, subsetSize, dataClusters):
   # Create starting data to train and cross validate on
   subset = allData[0:subsetSize]
   subsetLabels = allDataLabels[0:subsetSize]
@@ -51,12 +51,12 @@ def trainTestOnPoints(allData, allDataLabels, subsetSize, kclusters):
 
 
   # Up to but not including the end range. currently 4,5 beacuse mismatch on cluster count
-  for clusterFitSize in range(kclusters, kclusters + 1):
-    splitTrainTest2080(subset, subsetLabels, clusterFitSize, largeEvalSet, largeEvalSetLabels)
+  for clusterFitSize in range(2, 6):
+    splitTrainTest2080(subset, subsetLabels, clusterFitSize, largeEvalSet, largeEvalSetLabels, dataClusters)
 
 
 
-def splitTrainTest2080(subset, subsetLabels, kclusters,  largeEvalSet, largeEvalSetLabels):
+def splitTrainTest2080(subset, subsetLabels, kclusters,  largeEvalSet, largeEvalSetLabels, dataClusters):
   # train in different cuts
   for i in range (0, 5):
     # Randomize cuts using the random_state
@@ -66,8 +66,12 @@ def splitTrainTest2080(subset, subsetLabels, kclusters,  largeEvalSet, largeEval
     km = KMeans(n_clusters=kclusters)
     km.fit(X_train)
 
-    percentCorrect = determinePredictionCorrectness(kclusters, km, X_test, y_test)
-    percentCorrectOfLargeEval = determinePredictionCorrectness(kclusters, km, largeEvalSet, largeEvalSetLabels)
+    if (kclusters == dataClusters):
+      percentCorrect = determinePredictionCorrectness(kclusters, km, X_test, y_test)
+      percentCorrectOfLargeEval = determinePredictionCorrectness(kclusters, km, largeEvalSet, largeEvalSetLabels)
+    else:
+      percentCorrect = "N/A"
+      percentCorrectOfLargeEval = "N/A"
     # evalutate train (fit)
     trainAdjustedRandResult = metrics.adjusted_rand_score(y_train, km.labels_)  
     trainCalinskiResult = metrics.calinski_harabaz_score(X_train, km.labels_)
@@ -88,8 +92,12 @@ def splitTrainTest2080(subset, subsetLabels, kclusters,  largeEvalSet, largeEval
     fkm = FuzzyKMeans(k=kclusters, m=2)
     fkm.fit(X_train)
 
-    percentCorrect = determinePredictionCorrectness(kclusters, fkm, X_test, y_test)
-    percentCorrectOfLargeEval = determinePredictionCorrectness(kclusters, fkm, largeEvalSet, largeEvalSetLabels)
+    if (kclusters == dataClusters):
+      percentCorrect = determinePredictionCorrectness(kclusters, fkm, X_test, y_test)
+      percentCorrectOfLargeEval = determinePredictionCorrectness(kclusters, fkm, largeEvalSet, largeEvalSetLabels)
+    else:
+      percentCorrect = "N/A"
+      percentCorrectOfLargeEval = "N/A"
     # evalutate train (fit)
     trainAdjustedRandResult = metrics.adjusted_rand_score(y_train, fkm.labels_)  
     trainCalinskiResult = metrics.calinski_harabaz_score(X_train, fkm.labels_)
@@ -99,7 +107,7 @@ def splitTrainTest2080(subset, subsetLabels, kclusters,  largeEvalSet, largeEval
 
 
     # Record: point count, test accuracy, after evaluation results (500)
-    lineToWrite = "soft, " + str(kclusters) + ", " + str(len(subset)) + ", " + str(len(largeEvalSet))
+    lineToWrite = "soft, " + str(dataClusters) + ", " + str(kclusters) + ", " + str(len(subset)) + ", " + str(len(largeEvalSet))
     lineToWrite += ", " + str(percentCorrect) + ", " + str(percentCorrectOfLargeEval)
     lineToWrite += ", " + str(trainAdjustedRandResult) + ", " + str(trainCalinskiResult)
     lineToWrite += ", " + str(testAdjustedRandResult) + ", " + str(testCalinskiResult)
@@ -176,7 +184,7 @@ for i in range(2, len(allCenters)):
   dataSets.append(data)
   labelSets.append(labels)
 
-lineToWrite = "Kmeans Type, K Clusters (Data clusters is 4), Points Used 20/80, Points Used Post 20/80"
+lineToWrite = "Kmeans Type, data clusters, k clusters, Points Used 20/80, Points Used Post 20/80"
 lineToWrite += ", 20/80 Test Correct, Post 20/80 Correct"
 lineToWrite += ", 20/80 Train Adjusted Rand Score, 20/80 Train Calinski Score, 20/80 Test Adjusted Rand Score, 20/80 Test Calinski Score"
 utils.fileLog(lineToWrite)
